@@ -24,8 +24,8 @@ export class UserService {
     const user = new User();
     user.name = name;
     user.email = email;
-    user.password = password; // You should hash the password before saving it
-
+    user.password = password; 
+    
     return this.userRepository.save(user);
   }
 
@@ -49,7 +49,7 @@ export class UserService {
       fs.copyFileSync(profilePic.path, filePath);
       user.profilePic = filePath;
     }
-    if (password) user.password = password; // You should hash the password before saving it
+    if (password) user.password = password;
 
     return this.userRepository.save(user);
   }
