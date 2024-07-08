@@ -1,6 +1,8 @@
-import { IsEmail, IsNotEmpty, MinLength } from 'class-validator';
+import { IsEmail, IsIn, IsNotEmpty, IsString, MinLength } from 'class-validator';
+import { UserRole } from '../userRole.enum';
+import { errorMessages } from 'src/shared/constant/constant';
 
-export class UserRegistrationDto {
+export class CreateUserDto {
   @IsNotEmpty()
   name: string;
 
@@ -14,4 +16,11 @@ export class UserRegistrationDto {
   @IsNotEmpty()
   @MinLength(6)
   confirmPassword: string;
+  
+  @IsNotEmpty()
+  @IsString()
+  @IsIn([UserRole.Admin, UserRole.User], {
+    message: errorMessages.role,
+  })
+  role: UserRole;
 }
