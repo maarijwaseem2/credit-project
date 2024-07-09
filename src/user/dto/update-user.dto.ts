@@ -14,12 +14,6 @@ export class UserUpdateDto {
   phone?: string;
 
   @IsOptional()
-  @IsFile()
-  @MaxFileSize(1e6)
-  @HasMimeType(['image/jpeg', 'image/png'])
-  profilePic?: FileSystemStoredFile;
-
-  @IsOptional()
   @IsNotEmpty()
   @MinLength(6)
   password?: string;
@@ -28,4 +22,10 @@ export class UserUpdateDto {
   @IsNotEmpty()
   @MinLength(6)
   confirmPassword?: string;
+
+  @IsOptional()
+  @IsFile()
+  @MaxFileSize(1e6)
+  @HasMimeType(['image/jpeg', 'image/png'])
+  profilePic?: FileSystemStoredFile;
 }

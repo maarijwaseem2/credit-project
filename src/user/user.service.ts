@@ -75,32 +75,32 @@ export class UserService {
     const updatedFields: Partial<User> = {};
     if (userUpdateDto.name) {
       updatedFields.name = userUpdateDto.name;
-  }
-  if (userUpdateDto.email) {
-    updatedFields.email = userUpdateDto.email;
-  }
-  if (userUpdateDto.phone) {
-    updatedFields.phone = userUpdateDto.phone;
-  }
-  if (userUpdateDto.password) {
-    if (userUpdateDto.password !== userUpdateDto.confirmPassword) {
-      throw new BadRequestException('Passwords do not match');
     }
-    updatedFields.password = await bcrypt.hash(userUpdateDto.password, 10);
-  }
-  if (file) {
-    const filePath = path.join(__dirname, '../../uploads', file.originalname);
-    fs.copyFileSync(file.path, filePath);
-    updatedFields.profilePic = filePath;
-  }
+    if (userUpdateDto.email) {
+        updatedFields.email = userUpdateDto.email;
+    }
+    if (userUpdateDto.phone) {
+        updatedFields.phone = userUpdateDto.phone;
+    }
+    if (userUpdateDto.password) {
+        if (userUpdateDto.password !== userUpdateDto.confirmPassword) {
+            throw new BadRequestException('Passwords do not match');
+        }
+        updatedFields.password = await bcrypt.hash(userUpdateDto.password, 10);
+    }
+    if (file) {
+        const filePath = path.join(__dirname, '../../uploads', file.originalname);
+        fs.copyFileSync(file.path, filePath);
+        updatedFields.profilePic = filePath;
+    }
   
-  await this.userRepository.update(id, updatedFields);
-  const updatedUser = await this.userRepository.findOne({
-    where: { id },
-  });
-  return {
-    message: userMessages.userUpdate,
-    data: updatedUser,
-  };
-}
+    await this.userRepository.update(id, updatedFields);
+    const updatedUser = await this.userRepository.findOne({
+        where: { id },
+    });
+    return {
+        message: userMessages.userUpdate,
+        data: updatedUser,
+    };
+    }
 }
