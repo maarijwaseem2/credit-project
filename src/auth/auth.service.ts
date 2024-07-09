@@ -2,35 +2,51 @@ import { Injectable, UnauthorizedException, ConflictException, BadRequestExcepti
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { User } from '../user/entities/user.entity';
-import { LenderLoginRequestDto } from './dto/login-auth.dto';
+
+import { LoginUserDto } from './dto/login-auth.dto';
 import { ForgotPasswordRequestDto } from './dto/login-auth.dto';
 import { ResetPasswordRequestDto } from './dto/login-auth.dto';
 import { VerifyEmailDto } from './dto/login-auth.dto';
+import { JwtService } from '@nestjs/jwt';
+import { errorMessages, userMessages } from 'src/shared/constant/constant';
+import * as bcrypt from 'bcrypt';
+
+
 
 @Injectable()
 export class AuthService {
   constructor(
     @InjectRepository(User)
     private userRepository: Repository<User>,
+    private jwtService: JwtService,
   ) {}
+  private formatResponse(message: string, data: any) {
+    return { message, data };
+  }
+  async login(loginUserDto: LoginUserDto): Promise<any> {
+    const user = await this.userRepository.findOne({ where: { email:loginUserDto.email } });
+    if (!user) {
 
-  async login(loginDto: LenderLoginRequestDto) {
-    const { email, password } = loginDto;
-    const user = await this.userRepository.findOne({ where: { email } });
+      const errorMessage = errorMessages.invalidEmail;
+      throw new UnauthorizedException(this.formatResponse(errorMessage, errorMessage));
 
-    if (!user || user.password !== password) {
-      throw new UnauthorizedException('Wrong credentials');
+    }
+    const passwordMatch = await bcrypt.compare(loginUserDto.password, user.password);
+    if (!passwordMatch || !user) {
+      const errorMessage = errorMessages.invalidPassword;
+      throw new UnauthorizedException(this.formatResponse(errorMessage, errorMessage));
     }
 
-    // Generate token or any other login logic
-    return {
-      statusCode: 200,
-      messages: ['Lender logged in successfully'],
-      data: {
-        user,
-        // token,
-      },
-    };
+    const payload = { sub: user.id, email: user.email };
+    const token = await this.jwtService.signAsync(payload);
+    return this.formatResponse(userMessages.userCreate,{
+        id: user.id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+
+      token,
+    });
   }
 
   async forgotPassword(forgotPasswordDto: ForgotPasswordRequestDto) {
@@ -66,20 +82,31 @@ export class AuthService {
     };
   }
 
-  async verifyEmail(verifyEmailDto: VerifyEmailDto) {
-    const { email, verificationCode } = verifyEmailDto;
+  async validateUser(email: string, password: string): Promise<any> {
     const user = await this.userRepository.findOne({ where: { email } });
-
-    if (!user || user.verificationCode !== verificationCode) {
-      throw new BadRequestException('Bad request');
+    if (user && (await bcrypt.compare(password, user.password))) {
+      const { password, ...result } = user;
+      return result;
     }
+    const errorMessage = errorMessages.invalidAuth;
+    throw new UnauthorizedException(
+      this.formatResponse(errorMessage, errorMessage),
+    );
+  }}
+  // async verifyEmail(verifyEmailDto: VerifyEmailDto) {
+  //   const { email, verificationCode } = verifyEmailDto;
+  //   const user = await this.userRepository.findOne({ where: { email } });
 
-    // Verify email logic
+  //   if (!user || user.verificationCode !== verificationCode) {
+  //     throw new BadRequestException('Bad request');
+  //   }
 
-    return {
-      statusCode: 202,
-      messages: ['Email verified successfully'],
-      data: [],
-    };
-  }
-}
+  //   // Verify email logic
+
+  //   return {
+  //     statusCode: 202,
+  //     messages: ['Email verified successfully'],
+  //     data: [],
+  //   };
+  // }
+

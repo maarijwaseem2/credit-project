@@ -1,19 +1,22 @@
-import { Controller, Post, Body, Param, Put } from '@nestjs/common';
+import { Controller, Post, Body, Param, Patch, UseInterceptors, UploadedFile, ParseUUIDPipe } from '@nestjs/common';
 import { UserService } from './user.service';
-import { UserRegistrationDto } from './dto/create-user.dto';
+import { CreateUserDto } from './dto/create-user.dto';
 import { UserUpdateDto } from './dto/update-user.dto';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { multerOptions } from './file-upload.middleware';
 
 @Controller('users')
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
-  @Post('register')
-  async register(@Body() userRegistrationDto: UserRegistrationDto) {
+  @Post()
+  async register(@Body() userRegistrationDto: CreateUserDto) {
     return this.userService.registerUser(userRegistrationDto);
   }
 
-  @Put(':id')
-  async update(@Param('id') id: number, @Body() userUpdateDto: UserUpdateDto) {
-    return this.userService.updateUser(id, userUpdateDto);
+  @Patch(':id')
+  @UseInterceptors(FileInterceptor('upload_cover_image', multerOptions))
+  async update( @Param('id', ParseUUIDPipe) id: string, @Body() userUpdateDto: UserUpdateDto, @UploadedFile() file) {
+    return await this.userService.updateUser(id, userUpdateDto, file);
   }
 }

@@ -9,7 +9,7 @@ import { NestjsFormDataModule } from 'nestjs-form-data';
   imports: [
     TypeOrmModule.forRoot({
       type: 'mysql',
-      database: 'credits',
+      database: 'credit',
       port: 3306,
       username: "root",
       password: "",
