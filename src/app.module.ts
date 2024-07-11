@@ -8,11 +8,13 @@ import { AdminGuard } from './shared/guards/admin-auth.guard';
 
 import { APP_FILTER } from '@nestjs/core';
 import { HttpExceptionFilter } from './shared/filters/http-exception.filter';
+import { Borrower } from './borrower/entities/borrower.entity';
 @Module({
   imports: [
     ConfigModule.forRoot(),
     UserModule,
     AuthModule,
+    Borrower,
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
       useFactory: async (configService: ConfigService) => ({
