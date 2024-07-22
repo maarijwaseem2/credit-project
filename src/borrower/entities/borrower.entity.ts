@@ -1,10 +1,13 @@
 import { User } from 'src/user/entities/user.entity';
-import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn, OneToMany } from 'typeorm';
+import { PersonalAsset } from './personal-asset.entity';
+import { PrivateLoan } from './private-loan.entity';
+import { Exclude, Type } from 'class-transformer';
 
 @Entity()
 export class Borrower {
-  @PrimaryGeneratedColumn()
-  id: number;
+  @PrimaryGeneratedColumn('uuid')
+  id: string;
 
   @Column()
   name: string;
@@ -36,29 +39,15 @@ export class Borrower {
   @Column()
   term: number;
 
-  @Column({ type: 'text', nullable: true })
-  personalAssets: string; 
+  @OneToMany(() => PersonalAsset, (personalAsset) => personalAsset.borrower, { cascade: true })
+  @Type(() => PersonalAsset)
+  personalAssets: PersonalAsset[];
 
-  @Column({ type: 'text', nullable: true })
-  privateLoan: string;
+  @OneToMany(() => PrivateLoan, (privateLoan) => privateLoan.borrower, { cascade: true })
+  @Type(() => PrivateLoan)
+  privateLoans: PrivateLoan[];
 
   @ManyToOne(() => User, user => user.borrowers)
-  @JoinColumn({ name: 'user_id' })
+  @Exclude({ toPlainOnly: true })
   user: User;
-
-  setPersonalAssets(assets: { description: string; value: number }[]) {
-    this.personalAssets = JSON.stringify(assets);
-  }
-
-  getPersonalAssets(): { description: string; value: number }[] | null {
-    return this.personalAssets ? JSON.parse(this.personalAssets) : null;
-  }
-
-  setPrivateLoan(loan: { description: string; value: number }[]) {
-    this.privateLoan = JSON.stringify(loan);
-  }
-
-  getPrivateLoan(): { description: string; value: number }[] | null {
-    return this.privateLoan ? JSON.parse(this.privateLoan) : null;
-  }
 }

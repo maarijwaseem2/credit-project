@@ -7,6 +7,7 @@ import { ValidationPipe } from '@nestjs/common';
 import * as multer from 'multer';
 import { HttpExceptionFilter } from './shared/filters/http-exception.filter';
 import { JwtAuthGuard } from './shared/guards/jwt-auth.guard';
+import { ResponseInterceptor } from './shared/interceptor/response.interceptor';
 global.fetch = require('node-fetch');
 async function bootstrap() {
   dotenv.config();
@@ -25,6 +26,7 @@ const reflector = app.get(Reflector);
   app.useGlobalGuards(adminGuard);
   app.useGlobalGuards(new JwtAuthGuard());
   app.useGlobalFilters(new HttpExceptionFilter());
+  app.useGlobalInterceptors(new ResponseInterceptor());
   await app.listen(3000);
 }
 bootstrap();
