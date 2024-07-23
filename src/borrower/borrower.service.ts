@@ -3,6 +3,7 @@ import {
   NotFoundException,
   UnauthorizedException,
   UnprocessableEntityException,
+  ConflictException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, EntityManager } from 'typeorm';
@@ -17,13 +18,17 @@ export class BorrowerService {
   constructor(
     @InjectRepository(Borrower)
     private readonly borrowerRepository: Repository<Borrower>,
-    @InjectRepository(PersonalAsset)
-    private readonly personalAssetRepository: Repository<PersonalAsset>,
-    @InjectRepository(PrivateLoan)
-    private readonly privateLoanRepository: Repository<PrivateLoan>,
   ) {}
 
   async create(createBorrowerDto: CreateBorrowerDto): Promise<{ message: string, borrower: Borrower }> {
+    const { email } = createBorrowerDto;
+
+    // Check for existing email
+    const existingEmail = await this.borrowerRepository.findOne({ where: { email } });
+    if (existingEmail) {
+      throw new ConflictException('Email already in use');
+    }
+
     try {
       const borrower = this.borrowerRepository.create(createBorrowerDto);
       await this.borrowerRepository.save(borrower);
@@ -42,7 +47,7 @@ export class BorrowerService {
   }
 
   async findOne(id: string): Promise<{ message: string, borrower: Borrower }> {
-    const borrower = await this.borrowerRepository.findOne({where:{id},  relations: ['personalAssets', 'privateLoans'] });
+    const borrower = await this.borrowerRepository.findOne({where:{id}, relations: ['personalAssets', 'privateLoans'] });
     if (!borrower) {
       throw new NotFoundException('Borrower not found');
     }
@@ -89,17 +94,14 @@ export class BorrowerService {
 
   async remove(id: string): Promise<{ message: string }> {
     const borrower = await this.findOne(id);
-
     if (!borrower) {
       throw new NotFoundException('Borrower not found');
     }
-
     await this.borrowerRepository.manager.transaction(async (transactionalEntityManager: EntityManager) => {
-      await transactionalEntityManager.delete(PersonalAsset, { borrower });
-      await transactionalEntityManager.delete(PrivateLoan, { borrower });
+      await transactionalEntityManager.delete(PersonalAsset, { borrower: { id } });
+      await transactionalEntityManager.delete(PrivateLoan, { borrower: { id } });
       await transactionalEntityManager.delete(Borrower, id);
     });
-
     return { message: 'Borrower deleted successfully' };
   }
 }
