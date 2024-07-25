@@ -11,6 +11,7 @@ import { CreateBorrowerDto } from './dto/create-borrower.dto';
 import { UpdateBorrowerDto } from './dto/update-borrower.dto';
 import { PersonalAsset } from './entities/personal-asset.entity';
 import { PrivateLoan } from './entities/private-loan.entity';
+import { borrowerMessage } from 'src/shared/constant/constant';
 
 @Injectable()
 export class BorrowerService {
@@ -30,7 +31,7 @@ export class BorrowerService {
     try {
       const borrower = this.borrowerRepository.create(createBorrowerDto);
       await this.borrowerRepository.save(borrower);
-      return { message: 'Borrower added successfully', borrower };
+      return { message: borrowerMessage.borrowerCreate, borrower };
     } catch (error) {
       if (error.name === 'QueryFailedError') {
         throw new UnprocessableEntityException('Missing required fields');
@@ -41,7 +42,7 @@ export class BorrowerService {
 
   async findAll(): Promise<{ message: string, borrowers: Borrower[] }> {
     const borrowers = await this.borrowerRepository.find({ relations: ['personalAssets', 'privateLoans'] });
-    return { message: 'Borrowers retrieved successfully', borrowers };
+    return { message: borrowerMessage.allBorrowerFetched, borrowers };
   }
 
   async findOne(id: string): Promise<{ message: string, borrower: Borrower }> {
@@ -49,7 +50,7 @@ export class BorrowerService {
     if (!borrower) {
       throw new NotFoundException('Borrower not found');
     }
-    return { message: 'Borrower retrieved successfully', borrower };
+    return { message: borrowerMessage.borrowerFetched, borrower };
   }
 
   async update(id: string, updateBorrowerDto: UpdateBorrowerDto): Promise<{ message: string, borrower: Borrower }> {
@@ -83,7 +84,7 @@ export class BorrowerService {
       }
 
       const updatedBorrower = await this.findOne(id);
-      return { message: 'Borrower updated successfully', borrower: updatedBorrower.borrower };
+      return { message: borrowerMessage.borrowerUpdate, borrower: updatedBorrower.borrower };
     });
   }
 
@@ -97,6 +98,6 @@ export class BorrowerService {
       await transactionalEntityManager.delete(PrivateLoan, { borrower: { id } });
       await transactionalEntityManager.delete(Borrower, id);
     });
-    return { message: 'Borrower deleted successfully' };
+    return { message: borrowerMessage.borrowerDelete};
   }
 }

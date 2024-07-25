@@ -10,7 +10,7 @@ import { LoginUserDto } from './dto/login-auth.dto';
 import { ForgotPasswordRequestDto } from './dto/login-auth.dto';
 import { ResetPasswordRequestDto } from './dto/login-auth.dto';
 import { JwtService } from '@nestjs/jwt';
-import { errorMessages, userMessages } from 'src/shared/constant/constant';
+import { authMessage, errorMessages, userMessages } from 'src/shared/constant/constant';
 import * as bcrypt from 'bcrypt';
 import { UserService } from 'src/user/user.service';
 
@@ -48,7 +48,7 @@ export class AuthService {
 
     const payload = { sub: user.id, email: user.email };
     const token = await this.jwtService.signAsync(payload);
-    return this.formatResponse(userMessages.userCreate, {
+    return this.formatResponse(authMessage.authLogged, {
       id: user.id,
       name: user.name,
       email: user.email,
@@ -68,7 +68,7 @@ export class AuthService {
 
     return {
       statusCode: 200,
-      messages: ['Reset email has been sent successfully. Kindly check email'],
+      messages: [authMessage.resetPassword],
       data: [],
     };
   }
@@ -82,7 +82,7 @@ export class AuthService {
 
     return {
       statusCode: 201,
-      messages: ['Password updated successfully'],
+      messages: [authMessage.forgetPassword],
       data: [],
     };
   }

@@ -5,8 +5,7 @@ export class CreateNotificationDto {
   message: string;
 
   @IsNotEmpty()
-  @IsString()
-  status: string;
+  isRead: boolean;
 
   @IsNotEmpty()
   @IsUUID()

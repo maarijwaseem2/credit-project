@@ -1,8 +1,7 @@
-import { IsNotEmpty, IsString, } from 'class-validator';
+import { IsNotEmpty, } from 'class-validator';
 
 export class UpdateNotificationDto {
 
   @IsNotEmpty()
-  @IsString()
-  status: string;
+  isRead: boolean;
 }

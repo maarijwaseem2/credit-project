@@ -1,5 +1,6 @@
 import { Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
 import { User } from "../../user/entities/user.entity";
+import { IsString } from "class-validator";
 
 @Entity()
 export class Notification {
@@ -8,13 +9,14 @@ export class Notification {
     id: string;
 
     @Column()
+    @IsString()
     message: string;
 
     @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
     timeStamp: Date;
 
-    @Column()
-    status: string
+    @Column({ default: false })
+    isRead: boolean;
 
     @ManyToOne(() => User, user => user.notifications)
     @JoinColumn({ name: 'user_id' })
@@ -22,5 +24,6 @@ export class Notification {
 
     // Foreign key
     @Column({ nullable: true })
-    user_id: number; 
+    @IsString()
+    user_id: string; 
 }
