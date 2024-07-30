@@ -10,8 +10,6 @@ import { AdminGuard } from 'src/shared/guards/admin-auth.guard';
 @Controller('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
-  
-  @UseGuards(JwtAuthGuard, AdminGuard)
   @Post()
   async login(@Body() loginUserDto: LoginUserDto) {
     return await this.authService.login(loginUserDto);

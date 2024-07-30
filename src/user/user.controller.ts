@@ -15,8 +15,8 @@ export class UserController {
   }
 
   @Patch(':id')
-  @UseInterceptors(FileInterceptor('upload_cover_image', multerOptions))
-  async update( @Param('id', ParseUUIDPipe) id: string, @Body() userUpdateDto: UserUpdateDto, @UploadedFile() file) {
+  @UseInterceptors(FileInterceptor('profilePic', multerOptions))
+  async update( @Param('id', ParseUUIDPipe) id: string, @Body() userUpdateDto: UserUpdateDto, @UploadedFile() file: Express.Multer.File) {
     return await this.userService.updateUser(id, userUpdateDto, file);
   }
 }
