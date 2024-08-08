@@ -10,7 +10,7 @@ import { validate } from 'class-validator';
 import * as bcrypt from 'bcrypt';
 import { errorMessages, userMessages } from 'src/shared/constant/constant';
 import { NotificationService } from 'src/notification/notification.service';
-
+import { formatResponse, formatErrorResponse } from 'src/auth/utils/response.utils';
 @Injectable()
 export class UserService {
   constructor(
@@ -26,7 +26,7 @@ export class UserService {
       const errorMessage = errors
         .map((error) => Object.values(error.constraints).join(', '))
         .join(', ');
-      throw new BadRequestException(this.formatResponse(errorMessages.failed, errorMessage));
+      throw new BadRequestException(formatErrorResponse(errorMessages.failed, errorMessage));
     }
 
     const existingUser = await this.userRepository.findOne({
@@ -34,7 +34,7 @@ export class UserService {
     });
     if (existingUser) {
       const errorMessage = errorMessages.invalidInput;
-      throw new BadRequestException(this.formatResponse(errorMessage, errorMessage));
+      throw new BadRequestException(formatErrorResponse(errorMessage, errorMessage));
     }
 
     const hashedPassword = await bcrypt.hash(createUserDto.password, 10);
@@ -53,7 +53,7 @@ export class UserService {
     const firstWithId = await this.userRepository.findOne({
       where: { id: savedUser.id },
     });
-    return this.formatResponse(userMessages.userCreate, {
+    return formatResponse(userMessages.userCreate, {
       id: firstWithId.id,
       name: firstWithId.name,
       email: firstWithId.email,
@@ -61,16 +61,6 @@ export class UserService {
     });
   }
 
-  formatResponse(message: string, data: any): { message: string; data: User } {
-    return { message, data };
-  }
-
-  formatErrorResponse(message: string, errorMessage: string): { message: string; data: any[] } {
-    return { message: errorMessage, data: [] };
-  }
-
-
-  
   async updateUser(id: string, userUpdateDto: UserUpdateDto, file: Express.Multer.File): Promise<{ message: string; data: User }> {
     const user = await this.userRepository.findOne({ where: { id } });
     if (!user) {
@@ -103,10 +93,14 @@ export class UserService {
     const updatedUser = await this.userRepository.findOne({
         where: { id },
     });
-    return {
-        message: userMessages.userUpdate,
-        data: updatedUser,
-    };
+    return formatResponse(userMessages.userUpdate, {
+      id: updatedUser.id,
+      name: updatedUser.name,
+      email: updatedUser.email,
+      phone: updatedUser.phone,
+      profilePic: updatedUser.profilePic
+
+    });
     }
 
     async findByEmail(email: string): Promise<User | undefined> {
