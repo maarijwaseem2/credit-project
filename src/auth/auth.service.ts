@@ -6,12 +6,9 @@ import { User } from '../user/entities/user.entity';
 import { LoginUserDto } from './dto/login-auth.dto';
 import { ForgotPasswordRequestDto } from './dto/login-auth.dto';
 import { ResetPasswordRequestDto } from './dto/login-auth.dto';
-import { VerifyEmailDto } from './dto/login-auth.dto';
 import { JwtService } from '@nestjs/jwt';
 import { errorMessages, userMessages } from 'src/shared/constant/constant';
 import * as bcrypt from 'bcrypt';
-
-
 
 @Injectable()
 export class AuthService {
@@ -57,8 +54,6 @@ export class AuthService {
       throw new UnauthorizedException('Unauthorized');
     }
 
-    // Send reset email logic
-
     return {
       statusCode: 200,
       messages: ['Reset email has been sent successfully. Kindly check email'],
@@ -72,9 +67,6 @@ export class AuthService {
     if (newPassword !== confirmNewPassword) {
       throw new ConflictException("Passwords don't match");
     }
-
-    // Update password logic
-
     return {
       statusCode: 201,
       messages: ['Password updated successfully'],
@@ -93,20 +85,3 @@ export class AuthService {
       this.formatResponse(errorMessage, errorMessage),
     );
   }}
-  // async verifyEmail(verifyEmailDto: VerifyEmailDto) {
-  //   const { email, verificationCode } = verifyEmailDto;
-  //   const user = await this.userRepository.findOne({ where: { email } });
-
-  //   if (!user || user.verificationCode !== verificationCode) {
-  //     throw new BadRequestException('Bad request');
-  //   }
-
-  //   // Verify email logic
-
-  //   return {
-  //     statusCode: 202,
-  //     messages: ['Email verified successfully'],
-  //     data: [],
-  //   };
-  // }
-
