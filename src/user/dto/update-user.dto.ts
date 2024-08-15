@@ -1,5 +1,10 @@
 import { IsEmail, IsOptional, IsNotEmpty, MinLength } from 'class-validator';
-import { FileSystemStoredFile, HasMimeType, IsFile, MaxFileSize } from 'nestjs-form-data';
+import {
+  FileSystemStoredFile,
+  HasMimeType,
+  IsFile,
+  MaxFileSize,
+} from 'nestjs-form-data';
 
 export class UserUpdateDto {
   @IsOptional()

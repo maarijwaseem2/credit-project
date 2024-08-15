@@ -1,5 +1,11 @@
 import { User } from 'src/user/entities/user.entity';
-import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn, OneToMany } from 'typeorm';
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  ManyToOne,
+  OneToMany,
+} from 'typeorm';
 import { PersonalAsset } from './personal-asset.entity';
 import { PrivateLoan } from './private-loan.entity';
 import { Exclude, Type } from 'class-transformer';
@@ -39,15 +45,19 @@ export class Borrower {
   @Column()
   term: number;
 
-  @OneToMany(() => PersonalAsset, (personalAsset) => personalAsset.borrower, { cascade: true })
+  @OneToMany(() => PersonalAsset, (personalAsset) => personalAsset.borrower, {
+    cascade: true,
+  })
   @Type(() => PersonalAsset)
   personalAssets: PersonalAsset[];
 
-  @OneToMany(() => PrivateLoan, (privateLoan) => privateLoan.borrower, { cascade: true })
+  @OneToMany(() => PrivateLoan, (privateLoan) => privateLoan.borrower, {
+    cascade: true,
+  })
   @Type(() => PrivateLoan)
   privateLoans: PrivateLoan[];
 
-  @ManyToOne(() => User, user => user.borrowers)
+  @ManyToOne(() => User, (user) => user.borrowers)
   @Exclude({ toPlainOnly: true })
   user: User;
 }

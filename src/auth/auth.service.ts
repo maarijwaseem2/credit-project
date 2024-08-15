@@ -10,9 +10,10 @@ import { LoginUserDto } from './dto/login-auth.dto';
 import { ForgotPasswordRequestDto } from './dto/login-auth.dto';
 import { ResetPasswordRequestDto } from './dto/login-auth.dto';
 import { JwtService } from '@nestjs/jwt';
-import { authMessage, errorMessages, userMessages } from 'src/shared/constant/constant';
+import { authMessage, errorMessages } from 'src/shared/constant/constant';
 import * as bcrypt from 'bcrypt';
 import { UserService } from 'src/user/user.service';
+import { formatResponse } from './utils/response.utils';
 
 @Injectable()
 export class AuthService {
@@ -22,9 +23,7 @@ export class AuthService {
     private jwtService: JwtService,
     private readonly userService: UserService,
   ) {}
-  private formatResponse(message: string, data: any) {
-    return { message, data };
-  }
+
   async login(loginUserDto: LoginUserDto): Promise<any> {
     const user = await this.userRepository.findOne({
       where: { email: loginUserDto.email },
@@ -32,7 +31,7 @@ export class AuthService {
     if (!user) {
       const errorMessage = errorMessages.invalidEmail;
       throw new UnauthorizedException(
-        this.formatResponse(errorMessage, errorMessage),
+        formatResponse(errorMessage, errorMessage),
       );
     }
     const passwordMatch = await bcrypt.compare(
@@ -42,17 +41,16 @@ export class AuthService {
     if (!passwordMatch || !user) {
       const errorMessage = errorMessages.invalidPassword;
       throw new UnauthorizedException(
-        this.formatResponse(errorMessage, errorMessage),
+        formatResponse(errorMessage, errorMessage),
       );
     }
 
     const payload = { sub: user.id, email: user.email };
     const token = await this.jwtService.signAsync(payload);
-    return this.formatResponse(authMessage.authLogged, {
+    return formatResponse(authMessage.authLogged, {
       id: user.id,
       name: user.name,
       email: user.email,
-      role: user.role,
 
       token,
     });
@@ -90,18 +88,16 @@ export class AuthService {
   async validateUser(email: string, password: string): Promise<any> {
     const user = await this.userRepository.findOne({ where: { email } });
     if (user && (await bcrypt.compare(password, user.password))) {
-      const { password, ...result } = user;
+      const { ...result } = user;
       return result;
     }
     const errorMessage = errorMessages.invalidAuth;
-    throw new UnauthorizedException(
-      this.formatResponse(errorMessage, errorMessage),
-    );
+    throw new UnauthorizedException(formatResponse(errorMessage, errorMessage));
   }
   async verifyEmail(email: string, password: string): Promise<any> {
     const user = await this.userService.findByEmail(email);
     if (user && (await bcrypt.compare(password, user.password))) {
-      const { password, ...result } = user;
+      const { ...result } = user;
       return result;
     }
     throw new UnauthorizedException('Invalid credentials');

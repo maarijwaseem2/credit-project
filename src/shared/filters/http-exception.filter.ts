@@ -18,7 +18,9 @@ export class HttpExceptionFilter implements ExceptionFilter {
 
     const message = exception.message || 'Internal server error';
     const responseMessage =
-      status === HttpStatus.UNPROCESSABLE_ENTITY ? 'Missing required fields' : message;
+      status === HttpStatus.UNPROCESSABLE_ENTITY
+        ? 'Missing required fields'
+        : message;
 
     response.status(status).json({
       statusCode: status,

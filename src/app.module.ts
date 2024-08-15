@@ -1,4 +1,4 @@
-import { Module  } from '@nestjs/common';
+import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { UserModule } from './user/user.module';
 import { AuthModule } from './auth/auth.module';
@@ -8,7 +8,6 @@ import { AdminGuard } from './shared/guards/admin-auth.guard';
 
 import { APP_FILTER } from '@nestjs/core';
 import { HttpExceptionFilter } from './shared/filters/http-exception.filter';
-import { Borrower } from './borrower/entities/borrower.entity';
 import { BorrowerModule } from './borrower/borrower.module';
 import { NotificationModule } from './notification/notification.module';
 @Module({
@@ -35,11 +34,11 @@ import { NotificationModule } from './notification/notification.module';
     }),
     NotificationModule,
   ],
-  controllers:[],
-  providers:[
+  controllers: [],
+  providers: [
     {
-    provide: APP_GUARD,
-    useClass: AdminGuard,
+      provide: APP_GUARD,
+      useClass: AdminGuard,
     },
     {
       provide: APP_FILTER,

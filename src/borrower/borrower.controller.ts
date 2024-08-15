@@ -23,22 +23,29 @@ export class BorrowerController {
 
   @Post()
   @HttpCode(HttpStatus.CREATED)
-  async create(@Body() createBorrowerDto: CreateBorrowerDto): Promise<{ message: string, borrower: Borrower }> {
+  async create(
+    @Body() createBorrowerDto: CreateBorrowerDto,
+  ): Promise<{ message: string; borrower: Borrower }> {
     return this.borrowerService.create(createBorrowerDto);
   }
 
   @Get()
-  async findAll(): Promise<{ message: string, borrowers: Borrower[] }> {
+  async findAll(): Promise<{ message: string; borrowers: Borrower[] }> {
     return this.borrowerService.findAll();
   }
 
   @Get(':id')
-  async findOne(@Param('id') id: string): Promise<{ message: string, borrower: Borrower }> {
+  async findOne(
+    @Param('id') id: string,
+  ): Promise<{ message: string; borrower: Borrower }> {
     return this.borrowerService.findOne(id);
   }
 
   @Put(':id')
-  async update(@Param('id') id: string, @Body() updateBorrowerDto: UpdateBorrowerDto): Promise<{ message: string, borrower: Borrower }> {
+  async update(
+    @Param('id') id: string,
+    @Body() updateBorrowerDto: UpdateBorrowerDto,
+  ): Promise<{ message: string; borrower: Borrower }> {
     return this.borrowerService.update(id, updateBorrowerDto);
   }
 

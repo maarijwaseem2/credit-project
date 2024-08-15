@@ -1,4 +1,9 @@
-import { BadRequestException, Injectable, NotFoundException, ValidationError } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+  ValidationError,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { User } from './entities/user.entity';
@@ -10,7 +15,10 @@ import { validate } from 'class-validator';
 import * as bcrypt from 'bcrypt';
 import { errorMessages, userMessages } from 'src/shared/constant/constant';
 import { NotificationService } from 'src/notification/notification.service';
-import { formatResponse, formatErrorResponse } from 'src/auth/utils/response.utils';
+import {
+  formatResponse,
+  formatErrorResponse,
+} from 'src/auth/utils/response.utils';
 @Injectable()
 export class UserService {
   constructor(
@@ -19,14 +27,18 @@ export class UserService {
     private readonly notificationService: NotificationService,
   ) {}
 
-  async registerUser(createUserDto: CreateUserDto): Promise<{ message: string; data: User }> {
+  async registerUser(
+    createUserDto: CreateUserDto,
+  ): Promise<{ message: string; data: User }> {
     const userDto = Object.assign(new CreateUserDto(), createUserDto);
     const errors: ValidationError[] = await validate(userDto);
     if (errors.length > 0) {
       const errorMessage = errors
         .map((error) => Object.values(error.constraints).join(', '))
         .join(', ');
-      throw new BadRequestException(formatErrorResponse(errorMessages.failed, errorMessage));
+      throw new BadRequestException(
+        formatErrorResponse(errorMessages.failed, errorMessage),
+      );
     }
 
     const existingUser = await this.userRepository.findOne({
@@ -34,7 +46,9 @@ export class UserService {
     });
     if (existingUser) {
       const errorMessage = errorMessages.invalidInput;
-      throw new BadRequestException(formatErrorResponse(errorMessage, errorMessage));
+      throw new BadRequestException(
+        formatErrorResponse(errorMessage, errorMessage),
+      );
     }
 
     const hashedPassword = await bcrypt.hash(createUserDto.password, 10);
@@ -43,67 +57,65 @@ export class UserService {
       name: createUserDto.name,
       email: createUserDto.email,
       password: hashedPassword,
-      role: createUserDto.role,
     });
 
     const savedUser = await this.userRepository.save(newUser);
     await this.notificationService.createUserVerificationNotification(
       savedUser,
     );
-    const firstWithId = await this.userRepository.findOne({
-      where: { id: savedUser.id },
-    });
     return formatResponse(userMessages.userCreate, {
-      id: firstWithId.id,
-      name: firstWithId.name,
-      email: firstWithId.email,
-      role: firstWithId.role,
+      id: savedUser.id,
+      name: savedUser.name,
+      email: savedUser.email,
     });
   }
 
-  async updateUser(id: string, userUpdateDto: UserUpdateDto, file: Express.Multer.File): Promise<{ message: string; data: User }> {
+  async updateUser(
+    id: string,
+    userUpdateDto: UserUpdateDto,
+    file: Express.Multer.File,
+  ): Promise<{ message: string; data: User }> {
     const user = await this.userRepository.findOne({ where: { id } });
     if (!user) {
       throw new NotFoundException(errorMessages.notFound);
     }
-    
+
     const updatedFields: Partial<User> = {};
     if (userUpdateDto.name) {
       updatedFields.name = userUpdateDto.name;
     }
     if (userUpdateDto.email) {
-        updatedFields.email = userUpdateDto.email;
+      updatedFields.email = userUpdateDto.email;
     }
     if (userUpdateDto.phone) {
-        updatedFields.phone = userUpdateDto.phone;
+      updatedFields.phone = userUpdateDto.phone;
     }
     if (userUpdateDto.password) {
-        if (userUpdateDto.password !== userUpdateDto.confirmPassword) {
-            throw new BadRequestException('Passwords do not match');
-        }
-        updatedFields.password = await bcrypt.hash(userUpdateDto.password, 10);
+      if (userUpdateDto.password !== userUpdateDto.confirmPassword) {
+        throw new BadRequestException('Passwords do not match');
+      }
+      updatedFields.password = await bcrypt.hash(userUpdateDto.password, 10);
     }
     if (file) {
-        const filePath = path.join(__dirname, '../../uploads', file.originalname);
-        fs.copyFileSync(file.path, filePath);
-        updatedFields.profilePic = filePath;
+      const filePath = path.join(__dirname, '../../uploads', file.originalname);
+      fs.copyFileSync(file.path, filePath);
+      updatedFields.profilePic = filePath;
     }
-  
+
     await this.userRepository.update(id, updatedFields);
     const updatedUser = await this.userRepository.findOne({
-        where: { id },
+      where: { id },
     });
     return formatResponse(userMessages.userUpdate, {
       id: updatedUser.id,
       name: updatedUser.name,
       email: updatedUser.email,
       phone: updatedUser.phone,
-      profilePic: updatedUser.profilePic
-
+      profilePic: updatedUser.profilePic,
     });
-    }
+  }
 
-    async findByEmail(email: string): Promise<User | undefined> {
-      return this.userRepository.findOne({ where: { email } });
-    }
+  async findByEmail(email: string): Promise<User | undefined> {
+    return this.userRepository.findOne({ where: { email } });
+  }
 }

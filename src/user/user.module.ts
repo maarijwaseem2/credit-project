@@ -11,7 +11,6 @@ import { NotificationModule } from 'src/notification/notification.module';
     TypeOrmModule.forFeature([User]),
     NotificationModule,
     NestjsFormDataModule,
-
   ],
   controllers: [UserController],
   providers: [UserService],
